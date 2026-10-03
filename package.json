@@ -1,0 +1,43 @@
+{
+  "name": "shop-product-entry",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts --mode localdb",
+    "icons": "pwa-assets-generator",
+    "dev:local": "vite --host --mode localdb",
+    "dev:https": "HTTPS=1 vite --host",
+    "dev:local:https": "HTTPS=1 vite --host --mode localdb"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
+    "barcode-detector": "3.2.2",
+    "idb": "8.0.3",
+    "lucide-react": "1.51.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zxing-wasm": "3.1.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vite-pwa/assets-generator": "2.0.0",
+    "@vitejs/plugin-basic-ssl": "2.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "fake-indexeddb": "6.2.5",
+    "jsdom": "29.1.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vite": "8.3.2",
+    "vite-plugin-pwa": "2.0.0",
+    "vitest": "4.1.11"
+  }
+}

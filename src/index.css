@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f4f6f4; --surface: #ffffff; --surface-2: #edf1ed; --text: #0f1a14; --muted: #55605a;
+  --border: #dde4dd; --accent: #15803d; --accent-soft: #e4f3e8; --accent-contrast: #ffffff;
+  --danger: #b91c1c; --danger-soft: #fdecec; --warn: #8a4b08; --warn-soft: #fef3c7;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0f0d; --surface: #151b18; --surface-2: #1e2622; --text: #eef3ef; --muted: #9aa8a0;
+    --border: #28312c; --accent: #22c55e; --accent-soft: #10291a; --accent-contrast: #04210f;
+    --danger: #f87171; --danger-soft: #3a1517; --warn: #fcd34d; --warn-soft: #36290a;
+  }
+}
+@theme inline {
+  --color-bg: var(--bg); --color-surface: var(--surface); --color-surface-2: var(--surface-2);
+  --color-fg: var(--text); --color-muted: var(--muted); --color-line: var(--border);
+  --color-accent: var(--accent); --color-accent-soft: var(--accent-soft); --color-accent-fg: var(--accent-contrast);
+  --color-danger: var(--danger); --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn); --color-warn-soft: var(--warn-soft);
+}
+html, body, #root { height: 100%; }
+body {
+  background: var(--bg); color: var(--text); overscroll-behavior: none;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Bangla text: use the phone's Bangla fonts and a taller line so the marks are not clipped. */
+.bn { font-family: "Noto Sans Bengali", "Hind Siliguri", "Kohinoor Bangla", "Bangla Sangam MN", "Nirmala UI", system-ui, sans-serif; line-height: 1.5; }
+
+@layer components {
+.btn { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 text-base font-semibold transition-[transform,background-color] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50; }
+.btn-primary { @apply bg-accent text-accent-fg shadow-sm; }
+.btn-secondary { @apply border border-line bg-surface text-fg; }
+.btn-ghost { @apply text-fg hover:bg-surface-2; }
+.input { @apply min-h-12 w-full rounded-2xl border border-line bg-surface px-4 text-base text-fg placeholder:text-muted focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-accent; }
+.card { @apply rounded-3xl border border-line bg-surface p-4; }
+.chip { @apply inline-flex min-h-9 items-center gap-1.5 rounded-full bg-surface-2 px-3 text-sm font-medium text-fg; }
+}
+
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+.sheet-enter { animation: sheet-up 200ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: none; } }
+.toast-enter { animation: toast-in 180ms ease-out; }
+@keyframes scan-line { 0%, 100% { top: 8%; } 50% { top: 88%; } }
+.scan-line { animation: scan-line 2.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .sheet-enter, .toast-enter, .scan-line { animation: none; } }
