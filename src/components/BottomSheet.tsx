@@ -26,12 +26,14 @@ export function BottomSheet({ title, onClose, children }: { title: string; onClo
         className="sheet-enter relative max-h-[92dvh] w-full max-w-xl overflow-y-auto rounded-t-[2rem] bg-bg px-4 pt-3 shadow-2xl outline-none"
       >
         <div className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-line" aria-hidden />
-        <button
-          type="button" onClick={onClose} aria-label={tt('product.close.aria')}
-          className="absolute right-3 top-3 grid size-11 place-items-center rounded-full text-muted hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-accent"
-        >
-          <X className="size-5" aria-hidden />
-        </button>
+        <div className="sticky top-0 z-10 h-0">
+          <button
+            type="button" onClick={onClose} aria-label={tt('product.close.aria')}
+            className="absolute -top-6 right-0 grid size-10 place-items-center rounded-full bg-surface-2 text-muted hover:text-fg focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            <X className="size-5" aria-hidden />
+          </button>
+        </div>
         {children}
       </div>
     </div>
