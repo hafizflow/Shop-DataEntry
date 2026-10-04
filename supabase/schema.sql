@@ -82,6 +82,7 @@ begin
     new.created_by_email := old.created_by_email;
     new.created_by := old.created_by;
     new.created_at := old.created_at;
+    new.barcode := old.barcode;                                          -- a product's barcode never changes
     new.updated_at := now();
   end if;
   return new;
@@ -121,7 +122,7 @@ create policy products_insert on public.products for insert to authenticated
 
 drop policy if exists products_update on public.products;
 create policy products_update on public.products for update to authenticated
-  using ((select private.is_owner())) with check ((select private.is_owner()));
+  using (true) with check (true);                                        -- owners and employees may edit; delete stays owner-only
 
 drop policy if exists products_delete on public.products;
 create policy products_delete on public.products for delete to authenticated

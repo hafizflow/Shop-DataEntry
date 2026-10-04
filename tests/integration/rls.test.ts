@@ -91,9 +91,11 @@ describe.skipIf(!ready)('products RLS and constraints (real Supabase project)', 
     expect(r.error).not.toBeNull();
   });
 
-  it('stops an employee from updating or deleting', async () => {
-    const u = await employee.from('products').update({ name: 'TEST hacked' }).eq('barcode', base('a').barcode).select();
-    expect(u.data ?? []).toHaveLength(0);
+  it('lets an employee edit but not change the barcode, and stops them deleting', async () => {
+    const u = await employee.from('products').update({ selling_price: 12, barcode: 'TEST-other' }).eq('barcode', base('a').barcode).select().single();
+    expect(u.data!.selling_price).toBe(12);
+    expect(u.data!.barcode).toBe(base('a').barcode);
+    await owner.from('products').update({ selling_price: base('a').selling_price }).eq('barcode', base('a').barcode);
     const d = await employee.from('products').delete().eq('barcode', base('a').barcode).select();
     expect(d.data ?? []).toHaveLength(0);
     const still = await owner.from('products').select('name').eq('barcode', base('a').barcode).single();

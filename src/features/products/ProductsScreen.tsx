@@ -102,7 +102,7 @@ export function ProductsScreen() {
           <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
             <ProductDetails
               product={open}
-              onEdit={isOwner ? () => setEditing(open) : undefined}
+              onEdit={() => setEditing(open)}
               onDelete={isOwner ? async () => { await removeProduct(open); } : undefined}
             />
             <button className="btn btn-primary mt-3 w-full" onClick={() => setOpen(null)}><Bi k="product.close" /></button>

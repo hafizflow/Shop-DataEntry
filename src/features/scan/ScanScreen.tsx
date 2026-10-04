@@ -112,7 +112,7 @@ export function ScanScreen() {
         <BottomSheet title={tt('product.already')} onClose={resume}>
           <ProductDetails
             product={view.product} showAlready
-            onEdit={isOwner ? () => setView({ kind: 'edit', product: view.product }) : undefined}
+            onEdit={() => setView({ kind: 'edit', product: view.product })}
             onDelete={isOwner ? async () => {
               try {
                 await remove(view.product.id);
