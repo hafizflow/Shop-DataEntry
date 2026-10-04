@@ -61,14 +61,17 @@ export async function remove(id: string): Promise<void> {
 }
 
 const DAY = 24 * 60 * 60 * 1000;
-/** Delta sync by updated_at; a full refresh once a day also picks up deletions. False when offline. */
+/** Delta sync by updated_at, plus an id check so rows deleted on the server disappear too. False when offline. */
 export async function sync(): Promise<boolean> {
   try {
     const lastFull = await cache.getMeta<number>('lastFullSync');
     const full = !lastFull || Date.now() - lastFull > DAY;
     const rows = await api.fetchChangedSince(full ? null : ((await cache.getMeta<string>('lastSync')) ?? null));
     if (full) { await cache.replaceAll(rows); await cache.setMeta('lastFullSync', Date.now()); }
-    else await cache.putMany(rows);
+    else {
+      await cache.putMany(rows);
+      await cache.removeMissing(await api.fetchAllIds()); // deltas never include deletions
+    }
     const newest = rows.map((r) => r.updated_at ?? '').sort().pop();
     if (newest) await cache.setMeta('lastSync', newest);
     return true;

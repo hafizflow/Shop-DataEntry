@@ -7,7 +7,7 @@ export function startAutoSync(): () => void {
   tick();
   window.addEventListener('online', tick);
   document.addEventListener('visibilitychange', onVisible);
-  const timer = window.setInterval(() => void queue.flush(), 30_000);
+  const timer = window.setInterval(tick, 30_000);
   return () => {
     window.removeEventListener('online', tick);
     document.removeEventListener('visibilitychange', onVisible);

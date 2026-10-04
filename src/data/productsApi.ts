@@ -34,6 +34,16 @@ export async function fetchChangedSince(since: string | null): Promise<Product[]
   }
 }
 
+/** Ids of every product still on the server; lets the cache notice deletions without re-downloading rows. */
+export async function fetchAllIds(): Promise<string[]> {
+  const out: string[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const rows = ((await guard(() => supabase.from('products').select('id').order('id').range(from, from + PAGE - 1))) as { id: string }[] | null) ?? [];
+    out.push(...rows.map((r) => r.id));
+    if (rows.length < PAGE) return out;
+  }
+}
+
 export async function insertProduct(p: NewProduct & { id: string }): Promise<Product> {
   const row = (await guard(() => supabase.from('products').insert(p).select(COLS).single())) as Product | null;
   if (!row) throw mapError(new Error('insert returned no row'));

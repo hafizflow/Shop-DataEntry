@@ -8,7 +8,7 @@ import * as repo from './productRepo';
 import type { NewProduct, Product } from './types';
 
 vi.mock('./productsApi', () => ({
-  insertProduct: vi.fn(), fetchByBarcodes: vi.fn(), fetchChangedSince: vi.fn(), updateProduct: vi.fn(), deleteProduct: vi.fn(),
+  insertProduct: vi.fn(), fetchByBarcodes: vi.fn(), fetchChangedSince: vi.fn(), fetchAllIds: vi.fn(), updateProduct: vi.fn(), deleteProduct: vi.fn(),
 }));
 const A = vi.mocked(api);
 
@@ -173,6 +173,14 @@ describe('sync', () => {
     A.fetchChangedSince.mockResolvedValueOnce([]);
     await repo.sync();
     expect(A.fetchChangedSince).toHaveBeenLastCalledWith('2026-10-04T01:00:00Z');
+  });
+  it('drops cached rows deleted on the server, but keeps pending ones', async () => {
+    await cache.putMany([row('1'), row('2'), row('3', { pending: true })]);
+    await cache.setMeta('lastFullSync', Date.now());
+    A.fetchChangedSince.mockResolvedValueOnce([]);
+    A.fetchAllIds.mockResolvedValueOnce(['id1']);
+    await repo.sync();
+    expect((await cache.getAll()).map((p) => p.id).sort()).toEqual(['id1', 'id3']);
   });
   it('returns false when offline', async () => {
     A.fetchChangedSince.mockRejectedValueOnce(new ApiError('network', 'x'));

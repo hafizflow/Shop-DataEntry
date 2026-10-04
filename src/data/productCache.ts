@@ -44,6 +44,16 @@ export async function replaceAll(ps: Product[]) {
   changes.emit();
 }
 
+/** Drop synced rows the server no longer has (deleted elsewhere); pending rows are kept. */
+export async function removeMissing(serverIds: string[]) {
+  const db = await getDb();
+  const tx = db.transaction('products', 'readwrite');
+  const keep = new Set(serverIds);
+  const gone = (await tx.store.getAll()).filter((e) => !e.pending && !keep.has(e.id));
+  await Promise.all([...gone.map((e) => tx.store.delete(e.id)), tx.done]);
+  if (gone.length) changes.emit();
+}
+
 const norm = (s: string) => s.trim().replace(/\s+/g, ' ').toLowerCase();
 export async function findDuplicateTriple(n: NewProduct): Promise<Product | undefined> {
   const all = await getAll();
