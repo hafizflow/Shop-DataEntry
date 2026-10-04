@@ -18,13 +18,16 @@ export function AccountScreen() {
   const [exporting, setExporting] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  async function exportCsv() {
+  async function exportData(format: 'csv' | 'json') {
     setExporting(true);
     try {
-      const csv = buildCsv(await fetchAllForExport());
-      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const products = await fetchAllForExport();
+      const [body, type] = format === 'csv'
+        ? [buildCsv(products), 'text/csv;charset=utf-8']
+        : [JSON.stringify(products, null, 2), 'application/json;charset=utf-8'];
+      const url = URL.createObjectURL(new Blob([body], { type }));
       const a = document.createElement('a');
-      a.href = url; a.download = `products-${dhakaDayKey(new Date())}.csv`;
+      a.href = url; a.download = `products-${dhakaDayKey(new Date())}.${format}`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) { toast(tt(errorKey(mapError(e).kind)), 'error'); }
@@ -78,9 +81,14 @@ export function AccountScreen() {
       )}
 
       {isOwner && (
-        <button className="btn btn-secondary" disabled={exporting} onClick={() => void exportCsv()}>
-          <Download className="size-5" aria-hidden /><Bi k={exporting ? 'account.exporting' : 'account.export'} />
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button className="btn btn-secondary" disabled={exporting} onClick={() => void exportData('csv')}>
+            <Download className="size-5" aria-hidden /><Bi k={exporting ? 'account.exporting' : 'account.export'} />
+          </button>
+          <button className="btn btn-secondary" disabled={exporting} onClick={() => void exportData('json')}>
+            <Download className="size-5" aria-hidden /><Bi k={exporting ? 'account.exporting' : 'account.exportJson'} />
+          </button>
+        </div>
       )}
 
       {/* The queue is not tied to a user, so sign-out waits until everything has synced. */}

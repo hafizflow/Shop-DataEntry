@@ -51,6 +51,7 @@ export const bn: Record<MessageKey, string> = {
   'account.pending': 'সিঙ্ক বাকি ({n})', 'account.allSynced': 'সবকিছু সিঙ্ক হয়েছে',
   'account.syncNow': 'এখনই সিঙ্ক করুন', 'account.signOut': 'সাইন আউট',
   'account.signOutBlocked': 'সাইন আউটের আগে বাকি পণ্যগুলো সিঙ্ক করুন।',
+  'account.exportJson': 'JSON এক্সপোর্ট', 
   'account.export': 'CSV এক্সপোর্ট', 'account.exporting': 'এক্সপোর্ট হচ্ছে…',
   'account.attention': 'দেখা দরকার', 'account.retry': 'আবার চেষ্টা', 'account.discard': 'বাদ দিন',
   'badge.pending': 'সিঙ্ক বাকি ({n})',

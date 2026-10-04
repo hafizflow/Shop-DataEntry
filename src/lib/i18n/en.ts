@@ -49,6 +49,7 @@ export const en = {
   'account.pending': 'Pending sync ({n})', 'account.allSynced': 'Everything is synced',
   'account.syncNow': 'Sync now', 'account.signOut': 'Sign out',
   'account.signOutBlocked': 'Sync the pending items before signing out.',
+  'account.exportJson': 'Export JSON', 
   'account.export': 'Export CSV', 'account.exporting': 'Exporting…',
   'account.attention': 'Needs attention', 'account.retry': 'Retry', 'account.discard': 'Discard',
   'badge.pending': 'Pending sync ({n})',

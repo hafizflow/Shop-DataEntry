@@ -1,10 +1,11 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './auth/AuthProvider';
 import { LoginScreen } from './auth/LoginScreen';
 import { TabBar, type Tab } from './components/TabBar';
 import { ScanBarcode } from 'lucide-react';
 import { StatusPill } from './components/StatusPill';
 import { Bi } from './components/Bi';
+import { ScreenBoundary, lazyScreen } from './components/ScreenBoundary';
 import { Toaster, toast } from './components/Toast';
 import { ScanScreen } from './features/scan/ScanScreen';
 import { startAutoSync } from './data/autoSync';
@@ -13,8 +14,8 @@ import { getDetector } from './scanner/detector';
 import { env } from './lib/env';
 import { setBilingual, t, tt } from './lib/i18n';
 
-const ProductsScreen = lazy(() => import('./features/products/ProductsScreen').then((m) => ({ default: m.ProductsScreen })));
-const AccountScreen = lazy(() => import('./features/account/AccountScreen').then((m) => ({ default: m.AccountScreen })));
+const ProductsScreen = lazyScreen(() => import('./features/products/ProductsScreen').then((m) => ({ default: m.ProductsScreen })));
+const AccountScreen = lazyScreen(() => import('./features/account/AccountScreen').then((m) => ({ default: m.AccountScreen })));
 
 function Shell() {
   const { role } = useAuth();
@@ -36,11 +37,11 @@ function Shell() {
         <StatusPill />
       </header>
       <main className="min-h-0 flex-1 overflow-y-auto">
-        <Suspense fallback={null}>
+        <ScreenBoundary key={tab}><Suspense fallback={null}>
           {tab === 'scan' && <ScanScreen />}
           {tab === 'products' && <ProductsScreen />}
           {tab === 'account' && <AccountScreen />}
-        </Suspense>
+        </Suspense></ScreenBoundary>
       </main>
       <TabBar tab={tab} onChange={setTab} />
     </div>
