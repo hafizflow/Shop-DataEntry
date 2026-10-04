@@ -25,7 +25,7 @@ type View =
   | { kind: 'new'; code: string | null; offline: boolean }
   | { kind: 'edit'; product: Product };
 
-const RESCAN_COOLDOWN_MS = 2000;
+const RESCAN_COOLDOWN_MS = 1000;
 
 export function ScanScreen() {
   const { user, isOwner } = useAuth();

@@ -10,7 +10,7 @@ interface Options {
   confirmReads?: number;
 }
 type Status = 'starting' | 'running' | 'denied' | 'insecure' | 'error';
-type TrackCaps = MediaTrackCapabilities & { torch?: boolean };
+type TrackCaps = MediaTrackCapabilities & { torch?: boolean; focusMode?: string[] };
 
 const BACK = /back|rear|environment/i;
 const SECONDARY_LENS = /ultra|wide|tele|macro|depth|zoom|infrared|\bir\b/i;
@@ -61,7 +61,14 @@ export function useBarcodeScanner({ onDetect, enabled, confirmReads = 2 }: Optio
       await videoRef.current.play();
       if (mine !== generation.current) return;
       const track = stream.getVideoTracks()[0];
-      setTorchSupported(Boolean((track.getCapabilities?.() as TrackCaps | undefined)?.torch));
+      const caps = track.getCapabilities?.() as TrackCaps | undefined;
+      setTorchSupported(Boolean(caps?.torch));
+      // Keep refocusing on whatever is in the middle of the frame (where the barcode is held).
+      if (caps?.focusMode?.includes('continuous')) {
+        const c: Record<string, unknown> = { focusMode: 'continuous' };
+        if ((caps as { pointsOfInterest?: unknown }).pointsOfInterest) c.pointsOfInterest = [{ x: 0.5, y: 0.5 }];
+        await track.applyConstraints({ advanced: [c as MediaTrackConstraintSet] }).catch(() => { /* not supported */ });
+      }
       const cams = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'videoinput');
       if (back && !mainBackId.current) {
         // Labels only exist once permission is granted, so pick the lens now and reopen on it if needed.
@@ -101,10 +108,11 @@ export function useBarcodeScanner({ onDetect, enabled, confirmReads = 2 }: Optio
             reads = found === last ? reads + 1 : 1;
             last = found;
             if (reads >= confirmReads) {
-              done = true;
+              // Keep looping: if the caller ignores this code (cooldown, bad format) scanning must not die.
+              // When the caller pauses us (enabled=false) the effect cleanup stops the loop.
+              reads = 0; last = null;
               vibrate(); beep();
               onDetectRef.current(found);
-              return;
             }
           }
         } catch { /* a bad frame is not fatal */ } finally { busy = false; }
