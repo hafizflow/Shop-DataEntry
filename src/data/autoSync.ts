@@ -1,7 +1,9 @@
 import { queue, sync } from './productRepo';
+import { env } from '../lib/env';
 
 /** Flush the offline queue and refresh the cache on start, reconnect, app focus and every 30 s. */
 export function startAutoSync(): () => void {
+  if (env.localOnly) return () => {};
   const tick = () => { void queue.flush(); void sync(); };
   const onVisible = () => { if (document.visibilityState === 'visible') tick(); };
   tick();

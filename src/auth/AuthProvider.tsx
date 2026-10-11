@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { env } from '../lib/env';
 import { fetchProfileRole } from '../data/productsApi';
 
 interface AuthState {
@@ -19,8 +20,7 @@ const roleKey = (uid: string) => `role:${uid}`;
 const readRole = (uid: string) => { try { return localStorage.getItem(roleKey(uid)); } catch { return null; } };
 const writeRole = (uid: string, r: string) => { try { localStorage.setItem(roleKey(uid), r); } catch { /* storage blocked */ } };
 
-/** Dev-only: VITE_SKIP_LOGIN=true skips the login page and acts as a fixed owner. Server writes still need a real session. */
-const SKIP_LOGIN = import.meta.env.VITE_SKIP_LOGIN === 'true';
+/** Local-only mode has no login: the device acts as a fixed owner. */
 const skipValue: AuthState = {
   user: { id: '00000000-0000-0000-0000-000000000000', email: 'owner@local' },
   isOwner: true,
@@ -31,7 +31,7 @@ const skipValue: AuthState = {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  return SKIP_LOGIN ? <Ctx.Provider value={skipValue}>{children}</Ctx.Provider> : <SupabaseAuthProvider>{children}</SupabaseAuthProvider>;
+  return env.localOnly ? <Ctx.Provider value={skipValue}>{children}</Ctx.Provider> : <SupabaseAuthProvider>{children}</SupabaseAuthProvider>;
 }
 
 function SupabaseAuthProvider({ children }: { children: ReactNode }) {

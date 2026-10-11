@@ -5,6 +5,7 @@ import { mapError } from './errors';
 import { withTimeout } from './timeout';
 import { barcodeVariants } from '../lib/barcode';
 import { dhakaDayKey } from '../lib/format';
+import { env } from '../lib/env';
 import type { NewProduct, Product } from './types';
 
 /** The only data API the UI uses. Supabase and IndexedDB stay behind this file. */
@@ -19,6 +20,7 @@ export async function lookup(barcode: string): Promise<{ product: Product | null
   const variants = barcodeVariants(barcode);
   const cached = await cache.getByBarcodes(variants);
   if (cached) return { product: cached, offline: false };
+  if (env.localOnly) return { product: null, offline: false };
   if (!navigator.onLine) return { product: null, offline: true };
   try {
     const found = await withTimeout(api.fetchByBarcodes(variants), LOOKUP_TIMEOUT_MS);
@@ -43,6 +45,12 @@ export async function save(input: NewProduct, user: { id: string; email: string 
   if (existing) return { status: 'duplicate-product', existing };
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
+  if (env.localOnly) {
+    const sameBarcode = input.barcode ? await cache.getByBarcodes(barcodeVariants(input.barcode)) : undefined;
+    if (sameBarcode) return { status: 'duplicate-product', existing: sameBarcode };
+    await cache.put({ ...input, id, created_at: now, created_by: user.id, created_by_email: user.email, updated_at: now });
+    return { status: 'accepted', id };
+  }
   await cache.put({ ...input, id, created_at: now, created_by: user.id, created_by_email: user.email, updated_at: now, pending: true });
   await queue.enqueue(input, id, user.email);
   void queue.flush();
@@ -50,19 +58,27 @@ export async function save(input: NewProduct, user: { id: string; email: string 
 }
 
 export async function update(id: string, patch: Partial<Omit<NewProduct, 'barcode'>>): Promise<Product> {
+  if (env.localOnly) {
+    const old = (await cache.getAll()).find((p) => p.id === id);
+    if (!old) throw mapError({ code: '42501', message: 'product not found' });
+    const local = { ...old, ...patch, updated_at: new Date().toISOString() };
+    await cache.put(local);
+    return local;
+  }
   const updated = await api.updateProduct(id, patch);
   await cache.put(updated);
   return updated;
 }
 
 export async function remove(id: string): Promise<void> {
-  await api.deleteProduct(id);
+  if (!env.localOnly) await api.deleteProduct(id);
   await cache.remove(id);
 }
 
 const DAY = 24 * 60 * 60 * 1000;
 /** Delta sync by updated_at, plus an id check so rows deleted on the server disappear too. False when offline. */
 export async function sync(): Promise<boolean> {
+  if (env.localOnly) return true;
   try {
     const lastFull = await cache.getMeta<number>('lastFullSync');
     const full = !lastFull || Date.now() - lastFull > DAY;
@@ -83,6 +99,7 @@ export async function sync(): Promise<boolean> {
 }
 
 export async function fetchAllForExport(): Promise<Product[]> {
+  if (env.localOnly) return cache.getAll();
   try { return await api.fetchChangedSince(null); } catch { return cache.getAll(); }
 }
 
