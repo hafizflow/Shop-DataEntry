@@ -19,7 +19,22 @@ const roleKey = (uid: string) => `role:${uid}`;
 const readRole = (uid: string) => { try { return localStorage.getItem(roleKey(uid)); } catch { return null; } };
 const writeRole = (uid: string, r: string) => { try { localStorage.setItem(roleKey(uid), r); } catch { /* storage blocked */ } };
 
+/** Dev-only: VITE_SKIP_LOGIN=true skips the login page and acts as a fixed owner. Server writes still need a real session. */
+const SKIP_LOGIN = import.meta.env.VITE_SKIP_LOGIN === 'true';
+const skipValue: AuthState = {
+  user: { id: '00000000-0000-0000-0000-000000000000', email: 'owner@local' },
+  isOwner: true,
+  role: 'owner',
+  loading: false,
+  async signIn() { return true; },
+  async signOut() { /* nothing to sign out of */ },
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
+  return SKIP_LOGIN ? <Ctx.Provider value={skipValue}>{children}</Ctx.Provider> : <SupabaseAuthProvider>{children}</SupabaseAuthProvider>;
+}
+
+function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
