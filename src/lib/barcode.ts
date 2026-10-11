@@ -7,3 +7,6 @@ export function barcodeVariants(code: string): string[] {
   if (/^0\d{12}$/.test(c)) return [c, c.slice(1)];
   return [c];
 }
+
+
+// Updated code 
