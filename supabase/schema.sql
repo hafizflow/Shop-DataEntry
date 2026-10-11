@@ -49,9 +49,9 @@ create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
   barcode text,                                           -- null for products that have no barcode
   name text not null,
-  unit text not null,
-  selling_price numeric(12, 2) not null,
-  company text not null,
+  unit text,                                              -- unit, price and company are optional
+  selling_price numeric(12, 2),
+  company text,
   created_at timestamptz not null default now(),          -- when the product was added
   created_by uuid default auth.uid() references auth.users (id),
   created_by_email text,                                  -- "added by", stamped by trigger (cannot be forged)
@@ -59,7 +59,7 @@ create table if not exists public.products (
   constraint products_barcode_key unique (barcode),
   constraint products_barcode_not_blank check (barcode is null or length(barcode) > 0),
   constraint products_name_not_blank check (length(name) > 0),
-  constraint products_company_not_blank check (length(company) > 0),
+  constraint products_company_not_blank check (company is null or length(company) > 0),
   constraint products_unit_check check (unit in ('pcs', 'kg', 'g', 'litre', 'ml', 'dozen', 'pack', 'box')),
   constraint products_price_check check (selling_price >= 0)
 );
@@ -75,7 +75,7 @@ language plpgsql set search_path = '' as $$
 begin
   new.barcode := nullif(btrim(new.barcode), '');                         -- blank means "no barcode"
   new.name := regexp_replace(btrim(new.name), '\s+', ' ', 'g');          -- trim + collapse inner spaces
-  new.company := regexp_replace(btrim(new.company), '\s+', ' ', 'g');
+  new.company := nullif(regexp_replace(btrim(new.company), '\s+', ' ', 'g'), '');   -- blank means "no company"
   if tg_op = 'INSERT' then
     new.created_by_email := (select auth.jwt()) ->> 'email';
   else
@@ -95,7 +95,7 @@ create trigger products_before_write before insert or update on public.products
 
 -- The same product (name + company + unit) cannot be entered twice under a different barcode.
 create unique index if not exists products_name_company_unit_key
-  on public.products (lower(btrim(name)), lower(btrim(company)), lower(unit));
+  on public.products (lower(btrim(name)), lower(coalesce(btrim(company), '')), lower(coalesce(unit, '')));
 
 -- Fast name search (substring), delta sync, and the foreign key.
 create extension if not exists pg_trgm with schema extensions;
@@ -132,3 +132,10 @@ drop policy if exists profiles_select_own on public.profiles;
 create policy profiles_select_own on public.profiles for select to authenticated
   using (id = (select auth.uid()));
 -- No insert/update/delete policies on profiles: clients can never change roles.
+
+-- ---------- keep-alive ----------
+-- Called by .github/workflows/keep-supabase-alive.yml so a free project is not paused for inactivity.
+create or replace function public.ping() returns integer
+language sql stable set search_path = '' as $$ select 1 $$;
+revoke all on function public.ping() from public;
+grant execute on function public.ping() to anon, authenticated;

@@ -83,12 +83,12 @@ export function ProductsScreen() {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-semibold">{p.name}</span>
-                <span className="block truncate text-sm text-muted">{p.company} · <span className="font-mono">{p.barcode ?? t2('product.noBarcode')}</span></span>
+                <span className="block truncate text-sm text-muted">{p.company ? `${p.company} · ` : ''}<span className="font-mono">{p.barcode ?? t2('product.noBarcode')}</span></span>
                 {p.pending && <span className="mt-0.5 inline-block rounded-full bg-warn-soft px-2 text-xs font-bold text-warn"><Bi k="products.syncing" /></span>}
               </span>
               <span className="shrink-0 text-right">
-                <span className="block font-bold text-accent">৳ {formatPrice(p.selling_price)}</span>
-                <span className="block text-xs text-muted">{t2(`unit.${p.unit}`)}</span>
+                {p.selling_price !== null && <span className="block font-bold text-accent">৳ {formatPrice(p.selling_price)}</span>}
+                {p.unit && <span className="block text-xs text-muted">{t2(`unit.${p.unit}`)}</span>}
               </span>
               <ChevronRight className="size-5 shrink-0 text-muted" aria-hidden />
             </button>

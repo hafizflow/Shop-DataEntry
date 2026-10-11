@@ -5,9 +5,10 @@ export interface NewProduct {
   /** null for products that have no barcode */
   barcode: string | null;
   name: string;
-  unit: Unit;
-  selling_price: number;
-  company: string;
+  /** unit, price and company are optional; only the name is required */
+  unit: Unit | null;
+  selling_price: number | null;
+  company: string | null;
 }
 
 export interface Product extends NewProduct {

@@ -35,8 +35,8 @@ export function ProductSheet({ mode, barcode, initial, offline, onClose, onSaved
   const products = useProducts();
   const companies = useMemo(() => distinctCompanies(products), [products]);
   const [name, setName] = useState(initial?.name ?? '');
-  const [unit, setUnit] = useState<Unit>(initial?.unit ?? 'pcs');
-  const [price, setPrice] = useState(initial ? String(initial.selling_price) : '');
+  const [unit, setUnit] = useState<Unit | null>(initial?.unit ?? null);
+  const [price, setPrice] = useState(initial?.selling_price != null ? String(initial.selling_price) : '');
   const [company, setCompany] = useState(initial?.company ?? '');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<MessageKey | null>(null);
@@ -56,7 +56,7 @@ export function ProductSheet({ mode, barcode, initial, offline, onClose, onSaved
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (busy || !user) return;
-    const v = validateForm({ barcode, name, unit, price, company });
+    const v = validateForm({ barcode, name, unit: unit ?? '', price, company });
     if (!v.ok) { setErrors(v.errors); return; }
     setErrors({}); setFormError(null); setBusy(true);
     try {
@@ -118,13 +118,13 @@ export function ProductSheet({ mode, barcode, initial, offline, onClose, onSaved
               const on = u === unit;
               return (
                 <button
-                  key={u} type="button" role="radio" aria-checked={on} onClick={() => setUnit(u)}
+                  key={u} type="button" role="radio" aria-checked={on} onClick={() => setUnit(on ? null : u)}
                   className={`min-h-12 rounded-2xl border-2 px-1 text-base font-bold transition-colors active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${on ? 'border-accent bg-accent text-accent-fg shadow-sm' : 'border-line bg-surface text-fg'}`}
                 >{u === 'g' ? 'gram' : u}</button>
               );
             })}
           </div>
-          <p className="px-1 text-xs font-medium text-muted" aria-live="polite">{t2(`unit.${unit}`)}</p>
+          {unit && <p className="px-1 text-xs font-medium text-muted" aria-live="polite">{t2(`unit.${unit}`)}</p>}
         </div>
 
         <Field id="company" label="form.company" error={errors.company}>

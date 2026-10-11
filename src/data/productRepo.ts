@@ -106,7 +106,7 @@ export async function fetchAllForExport(): Promise<Product[]> {
 export function searchProducts(all: Product[], query: string): Product[] {
   const q = query.trim().toLowerCase();
   const hits = q
-    ? all.filter((p) => p.name.toLowerCase().includes(q) || (p.barcode ?? '').toLowerCase().includes(q) || p.company.toLowerCase().includes(q))
+    ? all.filter((p) => p.name.toLowerCase().includes(q) || (p.barcode ?? '').toLowerCase().includes(q) || (p.company ?? '').toLowerCase().includes(q))
     : [...all];
   return hits.sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
@@ -114,6 +114,7 @@ export function searchProducts(all: Product[], query: string): Product[] {
 export function distinctCompanies(all: Product[]): string[] {
   const seen = new Map<string, string>();
   for (const p of all) {
+    if (!p.company) continue;
     const key = p.company.trim().toLowerCase();
     if (!seen.has(key)) seen.set(key, p.company.trim());
   }

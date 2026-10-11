@@ -57,7 +57,7 @@ export async function removeMissing(serverIds: string[]) {
 const norm = (s: string) => s.trim().replace(/\s+/g, ' ').toLowerCase();
 export async function findDuplicateTriple(n: NewProduct): Promise<Product | undefined> {
   const all = await getAll();
-  return all.find((p) => norm(p.name) === norm(n.name) && norm(p.company) === norm(n.company) && p.unit.toLowerCase() === n.unit.toLowerCase());
+  return all.find((p) => norm(p.name) === norm(n.name) && norm(p.company ?? '') === norm(n.company ?? '') && (p.unit ?? '') === (n.unit ?? ''));
 }
 
 export async function getMeta<T>(key: string): Promise<T | undefined> {

@@ -44,11 +44,13 @@ export function ProductDetails({ product: p, showAlready, onEdit, onDelete }: Pr
       )}
       <div className="card">
         <h2 className="text-xl font-bold leading-snug">{p.name}</h2>
-        <p className="text-muted">{p.company}</p>
-        <p className="mt-3 flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-accent">৳ {formatPrice(p.selling_price)}</span>
-          <span className="chip">{tt(`unit.${p.unit}`)}</span>
-        </p>
+        {p.company && <p className="text-muted">{p.company}</p>}
+        {(p.selling_price !== null || p.unit) && (
+          <p className="mt-3 flex items-baseline gap-2">
+            {p.selling_price !== null && <span className="text-3xl font-bold text-accent">৳ {formatPrice(p.selling_price)}</span>}
+            {p.unit && <span className="chip">{tt(`unit.${p.unit}`)}</span>}
+          </p>
+        )}
         <div className="mt-3 divide-y divide-line border-t border-line">
           <Row Icon={Barcode} label="product.barcode"><span className="font-mono">{p.barcode ?? tt('product.noBarcode')}</span></Row>
           <Row Icon={UserRound} label="product.addedByLabel">{p.created_by_email ?? tt('product.unknownUser')}</Row>

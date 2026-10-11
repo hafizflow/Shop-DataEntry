@@ -101,8 +101,8 @@ export function ScanScreen() {
         <ul className="flex flex-col gap-2">
           {mine.slice(0, 3).map((p) => (
             <li key={p.id} className="card flex items-center justify-between gap-3 py-3">
-              <span className="min-w-0"><span className="block truncate font-semibold">{p.name}</span><span className="block truncate text-xs text-muted">{p.company}</span></span>
-              <span className="shrink-0 font-bold text-accent">৳ {formatPrice(p.selling_price)}</span>
+              <span className="min-w-0"><span className="block truncate font-semibold">{p.name}</span>{p.company && <span className="block truncate text-xs text-muted">{p.company}</span>}</span>
+              {p.selling_price !== null && <span className="shrink-0 font-bold text-accent">৳ {formatPrice(p.selling_price)}</span>}
             </li>
           ))}
         </ul>

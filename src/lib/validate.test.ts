@@ -29,9 +29,12 @@ describe('validateForm', () => {
     expect(r).toEqual({
       ok: false,
       errors: {
-        name: 'err.name.required', unit: 'err.unit.invalid',
-        price: 'err.price.invalid', company: 'err.company.required',
+        name: 'err.name.required', unit: 'err.unit.invalid', price: 'err.price.invalid',
       },
     });
+  });
+  it('needs only a name; unit, price and company may be empty', () => {
+    const r = validateForm({ barcode: '', name: 'Rice', unit: '', price: '', company: '' });
+    expect(r).toEqual({ ok: true, value: { barcode: null, name: 'Rice', unit: null, selling_price: null, company: null } });
   });
 });

@@ -21,12 +21,13 @@ export function validateForm(i: FormInput):
   const errors: FieldErrors = {};
   const barcode = normalizeBarcode(i.barcode ?? '') || null; // empty = product without a barcode
   const name = collapse(i.name);
-  const company = collapse(i.company);
-  const price = parsePrice(i.price);
+  const company = collapse(i.company) || null;
+  const priceText = i.price.trim();
+  const price = priceText ? parsePrice(priceText) : null;
+  const unit = i.unit && (UNITS as readonly string[]).includes(i.unit) ? (i.unit as Unit) : null;
   if (!name) errors.name = 'err.name.required';
-  if (!(UNITS as readonly string[]).includes(i.unit)) errors.unit = 'err.unit.invalid';
-  if (price === null) errors.price = 'err.price.invalid';
-  if (!company) errors.company = 'err.company.required';
+  if (i.unit && !unit) errors.unit = 'err.unit.invalid';
+  if (priceText && price === null) errors.price = 'err.price.invalid';
   if (Object.keys(errors).length) return { ok: false, errors };
-  return { ok: true, value: { barcode, name, unit: i.unit as Unit, selling_price: price!, company } };
+  return { ok: true, value: { barcode, name, unit, selling_price: price, company } };
 }
