@@ -9,4 +9,4 @@ export function barcodeVariants(code: string): string[] {
 }
 
 
-// My name is Git Reverter and I am a professional code reverser.
+// Hello you, Barry
