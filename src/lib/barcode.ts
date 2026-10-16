@@ -9,4 +9,4 @@ export function barcodeVariants(code: string): string[] {
 }
 
 
-// My name is Hafiz
+// Updated code 
